@@ -7,9 +7,35 @@
                 display: flex;
                 flex-direction: row;
                 font-family: 'Oxygen', sans-serif;
+                color: #2f4858;
                 background-color: #eee;
                 margin: 0px;
+            }
+
+            a {
+                color: black;
+            }
+
+            dialog {
+                border-radius: 5px;
+                border: none;
+                padding: 0px;
+                box-shadow: 0px 0px 50px #00000066;
+                font-family: 'Oxygen', sans-serif;
                 color: #2f4858;
+            }
+
+            dialog .header {
+                background-color: #336699;
+                padding: 20px;
+                color: white;
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+            }
+
+            dialog .content {
+                padding: 40px;
             }
 
             #sidebar {
@@ -74,9 +100,36 @@
                 margin: -10px 0px -10px 0px;
             }
 
+            button:hover {
+                opacity: 0.7;
+                cursor: pointer;
+            }
+
             button.remove {
                 background-color: #DB5461;
                 width: 40px;
+            }
+
+            input[type=time], select {
+                height: 40px;
+                font-family: 'Oxygen', sans-serif;
+                border-radius: 5px;
+                border: 1px solid silver;
+                padding: 10px;
+            }
+
+            select:hover {
+                border: 1px solid #86BBD8;
+            }
+
+            input[type=time]:focus, select:focus {
+                border: 1px solid #336699;
+                outline: 1px solid #336699;
+            }
+
+            input[type=time]:invalid {
+                border: 1px solid #DB5461;
+                outline: 1px solid #DB5461;
             }
 
             #logo {
@@ -108,6 +161,11 @@
 
             .card:last-child {
                 border-radius: 0px 10px 10px 0px;
+            }
+
+            .card:hover {
+                border-color: #336699;
+                cursor: pointer;
             }
 
             .title {
@@ -155,10 +213,6 @@
                 gap: 20px;
             }
 
-            a {
-                color: black;
-            }
-
             .grid {
                 border: 1px solid silver;
                 border-radius: 5px;
@@ -176,11 +230,15 @@
                 gap: 20px;
             }
 
-            .grid-row:first-child {
+            .grid-row:first-of-type:last-of-type {
+                border-radius: 5px;
+            }
+
+            .grid-row:first-of-type {
                 border-radius: 5px 5px 0px 0px;
             }
 
-            .grid-row:last-child {
+            .grid-row:last-of-type {
                 border-radius: 0px 0px 5px 5px;
             }
 
@@ -201,6 +259,8 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
+                cursor: pointer;
+                user-select: none;
             }
 
             .weekend {
@@ -212,6 +272,8 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
+                cursor: pointer;
+                user-select: none;
             }
 
             .weekday.active {
@@ -263,12 +325,91 @@
             .description {
                 font-size: 14px;
             }
+
+            .close-button {
+                font-size: 30px;
+            }
+
+            .close-button:hover {
+                background-color: #eeeeee33;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+
+            .emphasis {
+                font-weight: bold;
+            }
         </style>
 
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Cantarell:wght@400;700&family=Konkhmer+Sleokchher&family=Oxygen:wght@300;400;700&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+        <script>
+            let model = {
+                codes: [
+                    {
+                        code: "ABCD1234",
+                        name: "Carpenter",
+                        created: "2023-05-12 13:37",
+                        ttl: "10"
+                    },
+                    {
+                        code: "FQGA9865",
+                        name: "Plumber",
+                        created: "2023-05-12 13:37",
+                        ttl: "10"
+                    },
+                ],
+                schedule: [
+                    {
+                        start: "09:00",
+                        end: "10:30",
+                        weekdays: [ "Mo", "Tu", "We", "Th", "Fr", "Sa", "Su" ]
+                    },
+                    {
+                        start: "17:00",
+                        end: "19:00",
+                        weekdays: [ "Th" ]
+                    },
+                    {
+                        start: "15:00",
+                        end: "16:00",
+                        weekdays: [ "Mo", "Sa", "Su" ]
+                    }
+                ],
+                temporaryAccessUntil: new Date(),
+                addSchedule: undefined,
+                extendActivation: undefined
+            };
+
+            function toggleWeekday(collection, day)
+            {
+                let index = collection.indexOf(day);
+
+                if (index < 0)
+                {
+                    collection.push(day);
+                }
+                else
+                {
+                    collection.splice(index, 1);
+                }
+            }
+
+            function weekdayClasses(collection, index, day)
+            {
+                return [index < 5 ? 'weekday' : 'weekend', collection?.indexOf(day) >= 0 && 'active'];
+            }
+
+            function allWeekdays()
+            {
+                return ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+            }
+        </script>
     </head>
     <body>
         <div id="sidebar">
@@ -286,7 +427,61 @@
                 Sign out
             </div>
         </div>
-        <div id="content">
+        <div id="content" x-data="model">
+            <dialog x-effect="(addSchedule || $el.close()) && $el.showModal()">
+                <div class="header gap-huge title">
+                    <div class="stretch">Add schedule entry</div>
+                    <div class="close-button" x-on:click="addSchedule = undefined">
+                        <i class="bi bi-x"></i>
+                    </div>
+                </div>
+                <div class="content column gap-huge">
+                    <div class="section">
+                        <div class="section-header">Time interval</div>
+                        <div class="row gap-small foreign-center">
+                            <input type="time" class="stretch" x-model="addSchedule.start" required="true"></input> -
+                            <input type="time" class="stretch" x-model="addSchedule.end" required="true"></input>
+                        </div>
+                    </div>
+                    <div class="section">
+                        <div class="section-header">Weekdays</div>
+                        <div class="weekdays">
+                            <template x-for="(day, i) in allWeekdays()">
+                                <div x-on:click="toggleWeekday(addSchedule.weekdays, day)" :class="weekdayClasses(addSchedule.weekdays, i, day)" x-text="day"></div>
+                            </template>
+                        </div>
+                    </div>
+                    <div class="center">
+                        <button x-on:click="schedule.push(addSchedule); addSchedule = undefined;">Add</button>
+                    </div>
+                </div>
+            </dialog>
+
+            <dialog x-effect="(extendActivation || $el.close()) && $el.showModal()">
+                <div class="header gap-huge title">
+                    <div class="stretch">Activate access</div>
+                    <div class="close-button" x-on:click="extendActivation = undefined">
+                        <i class="bi bi-x"></i>
+                    </div>
+                </div>
+                <div class="content column gap-huge">
+                    <div class="column gap-large" style="width: 400px;">
+                        <div>Select a time period for which to allow anyone to enter by calling the number.</div>
+                        <div>This exception will be removed automatically once the specified time has elapsed.</div>
+
+                        <select>
+                            <option>30 minutes</option>
+                            <option>1 hour</option>
+                            <option>2 hours</option>
+                            <option>4 hours</option>
+                        </select>
+                    </div>
+                    <div class="center">
+                        <button x-on:click="temporaryAccessUntil = new Date(); extendActivation = undefined;">Activate</button>
+                    </div>
+                </div>
+            </dialog>
+
             <div class="column padding-huge">
                 <div>
                     <h1>Type of setup</h1>
@@ -296,14 +491,16 @@
                             <i class="bi bi-key-fill title"></i>
                             <div class="column gap-large">
                                 <div class="title">Manual</div>
-                                <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas viverra est non neque dapibus, vitae sollicitudin mi vestibulum. Praesent ac metus faucibus, dapibus leo quis, facilisis nulla.</div>
+                                <div>Each call will be handled according to the rules specified in the settings, with fallback to manual approval using the app.</div>
                             </div>
                         </div>
                         <div class="card row padding-large">
                             <i class="bi bi-grip-vertical title"></i>
                             <div class="column gap-large">
                                 <div class="title">Keypad</div>
-                                <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas viverra est non neque dapibus, vitae sollicitudin mi vestibulum. Praesent ac metus faucibus, dapibus leo quis, facilisis nulla.</div>
+                                <div>The doorbell is transformed into a keypad, with a user customizable code for opening the door.
+                                <p>No calls are handled manually in this mode.</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -314,14 +511,19 @@
                     <div class="column gap-huge">
                         <div class="section">
                             <div class="section-header">
-                                Temporary activation
+                                Temporary access
                             </div>
                             <div class="section-content">
                                 <div class="row">
                                     <div class="stretch foreign-center">
-                                        Temporary access is currently not activated.
+                                        <div x-show="temporaryAccessUntil">
+                                            Temporary access is activated until <span class="emphasis" x-text="temporaryAccessUntil?.toLocaleTimeString()"></span>.
+                                        </div>
+                                        <div x-show="!temporaryAccessUntil">
+                                            Temporary access is currently not activated.
+                                        </div>
                                     </div>
-                                    <button>Activate for...</button>
+                                    <button x-on:click="extendActivation = {}" x-text="temporaryAccessUntil ? 'Extend...' : 'Activate for...'"></button>
                                 </div>
                             </div>
                         </div>
@@ -336,67 +538,27 @@
                                     <div class="stretch foreign-center">
                                         Open the door automatically at these times of the day.
                                     </div>
-                                    <button>Add...</button>
+                                    <button x-on:click="addSchedule = { weekdays: [] }">Add...</button>
                                 </div>
 
-                                <div class="grid">
-                                    <div class="grid-row">
-                                        <div class="column stretch gap-small">
-                                            <div class="title">09:00 - 10:30</div>
-                                            <div class="weekdays">
-                                                <div class="weekday active">Mo</div>
-                                                <div class="weekday active">Tu</div>
-                                                <div class="weekday active">We</div>
-                                                <div class="weekday active">Th</div>
-                                                <div class="weekday active">Fr</div>
-                                                <div class="weekend active">Sa</div>
-                                                <div class="weekend active">Su</div>
+                                <div class="grid" x-show="schedule.length > 0">
+                                    <template x-for="(row, index) in schedule">
+                                        <div class="grid-row">
+                                            <div class="column stretch gap-small">
+                                                <div class="title"><span x-text="row.start"></span>&nbsp;-&nbsp;<span x-text="row.end"></span></div>
+                                                <div class="weekdays">
+                                                    <template x-for="(day, i) in allWeekdays()">
+                                                        <div :class="weekdayClasses(row.weekdays, i, day)" x-text="day"></div>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                            <div class="center">
+                                                <button class="remove" x-on:click="schedule.splice(index, 1)">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
                                             </div>
                                         </div>
-                                        <div class="center">
-                                            <button class="remove">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div class="grid-row">
-                                        <div class="column stretch gap-small">
-                                            <div class="title">17:00 - 19:00</div>
-                                            <div class="weekdays">
-                                                <div class="weekday">Mo</div>
-                                                <div class="weekday">Tu</div>
-                                                <div class="weekday">We</div>
-                                                <div class="weekday active">Th</div>
-                                                <div class="weekday">Fr</div>
-                                                <div class="weekend">Sa</div>
-                                                <div class="weekend">Su</div>
-                                            </div>
-                                        </div>
-                                        <div class="center">
-                                            <button class="remove">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div class="grid-row">
-                                        <div class="column stretch gap-small">
-                                            <div class="title">15:00 - 16:00</div>
-                                            <div class="weekdays">
-                                                <div class="weekday active">Mo</div>
-                                                <div class="weekday">Tu</div>
-                                                <div class="weekday">We</div>
-                                                <div class="weekday">Th</div>
-                                                <div class="weekday">Fr</div>
-                                                <div class="weekend active">Sa</div>
-                                                <div class="weekend active">Su</div>
-                                            </div>
-                                        </div>
-                                        <div class="center">
-                                            <button class="remove">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </div>
-                                    </div>
+                                    </template>
                                 </div>
                             </div>
                         </div>
@@ -409,42 +571,27 @@
                             <div class="section-content">
                                 <div class="row">
                                     <div class="stretch foreign-center">These codes can be used for temporary access.</div>
-                                    <button>Generate...</button>
+                                    <button x-on:click="codes.push({})">Generate...</button>
                                 </div>
 
-                                <div class="grid">
-                                    <div class="grid-row">
-                                        <div class="activation-code">FGHJ8765</div>
-
-                                        <div class="column stretch gap-small">
-                                            <div class="title">Carpenter</div>
-                                            <div class="description">
-                                                Created 2023-05-12 13:37<br />
-                                                Allows access for 10 minutes
+                                <div class="grid" x-show="codes.length > 0">
+                                    <template x-for="(row, index) in codes">
+                                        <div class="grid-row">
+                                            <div class="activation-code" x-text="row.code"></div>
+                                            <div class="column stretch gap-small">
+                                                <div class="title" x-text="row.name"></div>
+                                                <div class="description">
+                                                    Created <span x-text="row.created"></span><br />
+                                                    Allows access for <span x-text="row.ttl"></span> minutes
+                                                </div>
+                                            </div>
+                                            <div class="center">
+                                                <button class="remove" x-on:click="codes.splice(index, 1)">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
                                             </div>
                                         </div>
-                                        <div class="center">
-                                            <button class="remove">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div class="row grid-row padding-large bottom">
-                                        <div class="activation-code">ABCD1234</div>
-
-                                        <div class="column stretch gap-small">
-                                            <div class="title">Plumber</div>
-                                            <div class="description">
-                                                Created 2023-05-12 13:37<br />
-                                                Allows access for 10 minutes
-                                            </div>
-                                        </div>
-                                        <div class="center">
-                                            <button class="remove">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </div>
-                                    </div>
+                                    </template>
                                 </div>
                             </div>
                         </div>
