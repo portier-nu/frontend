@@ -51,6 +51,7 @@
                 overflow: auto;
                 display: flex;
                 justify-content: center;
+                padding: 40px;
             }
 
             .row {
@@ -92,12 +93,13 @@
                 width: 150px;
                 height: 40px;
                 background-color: #336699;
+/*                 background: linear-gradient(180deg, #3971aa 20%, rgba(51,102,153,1) 100%); */
                 border-style: none;
                 border-radius: 5px;
                 color: white;
                 font-family: 'Oxygen', sans-serif;
                 font-size: 16px;
-                margin: -10px 0px -10px 0px;
+/*                 margin: -10px 0px -10px 0px; */
             }
 
             button:hover {
@@ -108,6 +110,10 @@
             button.remove {
                 background-color: #DB5461;
                 width: 40px;
+            }
+
+            button.remove .description {
+                display: none;
             }
 
             input[type=time], select {
@@ -150,9 +156,10 @@
             .card {
                 padding: 20;
                 border: 1px solid silver;
-                width: 400px;
+                max-width: 400px;
                 margin: -1px;
                 background-color: white;
+                flex: 1;
             }
 
             .card:first-child {
@@ -193,6 +200,7 @@
             .selected {
                 border-color: #336699;
                 background-color: #336699;
+/*                 background: linear-gradient(180deg, #3971aa 20%, rgba(51,102,153,1) 100%); */
                 color: white;
             }
 
@@ -223,6 +231,7 @@
             }
 
             .grid-row {
+                position: relative;
                 background-color: white;
                 display: flex;
                 flex-direction: row;
@@ -339,6 +348,134 @@
             .emphasis {
                 font-weight: bold;
             }
+
+            .header-large {
+                font-size: 30px;
+                font-weight: bold;
+            }
+
+            .dialog-fill {
+                height: calc(100% - 145px)
+            }
+
+            #setup-type-selector {
+                display: flex;
+                flex-direction: row;
+            }
+
+            #setup-type-selector .description {
+                font-size: 16px;
+            }
+
+            button:not(.icon-button) > i {
+                display: none;
+            }
+
+            button > .description {
+                font-size: 16px;
+            }
+
+            .grid-row-remove {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            @media only screen and (max-width: 1200px) {
+                body {
+                    flex-direction: column;
+                }
+
+                #sidebar {
+                    flex-direction: row;
+                    width: unset;
+                    position: relative;
+                    box-shadow: 0px 1px 10px #00000066;
+                }
+
+                #logo {
+                    display: none;
+                }
+
+                .sidebar-item {
+                    padding: 15px;
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    gap: 15px;
+                    font-size: 16px;
+                    flex: 1;
+                }
+            }
+
+            @media only screen and (max-width: 800px) {
+                #setup-type-selector .description {
+                    display: none;
+                }
+
+                #content {
+                    padding: 20px;
+                }
+
+                button:not(.icon-button) {
+                    width: 40px;
+                }
+
+                button .description {
+                    display: none;
+                }
+
+                button:not(.icon-button) > i {
+                    display: block;
+                }
+
+                button.remove {
+                    flex-direction: row;
+                    justify-content: center;
+                    align-items: center;
+                    width: 140px;
+                    gap: 10px;
+                    display: none;
+                }
+
+                button.remove .description {
+                    display: block;
+                }
+
+                .grid-row-remove {
+                    position: absolute;
+                    top: 5;
+                    left: 5;
+                    bottom: 5;
+                    right: 5;
+                    opacity: 0;
+                    border-radius: 5px;
+                }
+
+                .grid-row-remove:focus-within {
+                    background-color: #000000AA;
+                    opacity: 1;
+                }
+
+                .grid-row-remove:focus-within > button.remove {
+                    display: flex;
+                }
+
+                .card {
+                    width: unset;
+                    flex: 1;
+                }
+
+                dialog {
+                    box-shadow: none;
+                    width: 100vh;
+                    height: 100vh;
+                    margin: 0px;
+                    border-radius: 0px;
+                    max-width: 100vw;
+                    max-height: unset;
+                }
+            }
         </style>
 
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -347,6 +484,8 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
         <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
         <script>
             let model = {
@@ -435,24 +574,26 @@
                         <i class="bi bi-x"></i>
                     </div>
                 </div>
-                <div class="content column gap-huge">
-                    <div class="section">
-                        <div class="section-header">Time interval</div>
-                        <div class="row gap-small foreign-center">
-                            <input type="time" class="stretch" x-model="addSchedule.start" required="true"></input> -
-                            <input type="time" class="stretch" x-model="addSchedule.end" required="true"></input>
+                <div class="center dialog-fill">
+                    <div class="content column gap-huge">
+                        <div class="section">
+                            <div class="section-header">Time interval</div>
+                            <div class="row gap-small foreign-center">
+                                <input type="time" class="stretch" x-model="addSchedule.start" required="true"></input> -
+                                <input type="time" class="stretch" x-model="addSchedule.end" required="true"></input>
+                            </div>
                         </div>
-                    </div>
-                    <div class="section">
-                        <div class="section-header">Weekdays</div>
-                        <div class="weekdays">
-                            <template x-for="(day, i) in allWeekdays()">
-                                <div x-on:click="toggleWeekday(addSchedule.weekdays, day)" :class="weekdayClasses(addSchedule.weekdays, i, day)" x-text="day"></div>
-                            </template>
+                        <div class="section">
+                            <div class="section-header">Weekdays</div>
+                            <div class="weekdays">
+                                <template x-for="(day, i) in allWeekdays()">
+                                    <div x-on:click="toggleWeekday(addSchedule.weekdays, day)" :class="weekdayClasses(addSchedule.weekdays, i, day)" x-text="day"></div>
+                                </template>
+                            </div>
                         </div>
-                    </div>
-                    <div class="center">
-                        <button x-on:click="schedule.push(addSchedule); addSchedule = undefined;">Add</button>
+                        <div class="center">
+                            <button x-on:click="schedule.push(addSchedule); addSchedule = undefined;" class="icon-button">Add</button>
+                        </div>
                     </div>
                 </div>
             </dialog>
@@ -464,8 +605,8 @@
                         <i class="bi bi-x"></i>
                     </div>
                 </div>
-                <div class="content column gap-huge">
-                    <div class="column gap-large" style="width: 400px;">
+                <div class="center content column gap-huge dialog-fill">
+                    <div class="column gap-large" style="max-width: 400px;">
                         <div>Select a time period for which to allow anyone to enter by calling the number.</div>
                         <div>This exception will be removed automatically once the specified time has elapsed.</div>
 
@@ -476,37 +617,37 @@
                             <option>4 hours</option>
                         </select>
                     </div>
-                    <div class="center">
-                        <button x-on:click="temporaryAccessUntil = new Date(); extendActivation = undefined;">Activate</button>
+                    <div class="foreign-center">
+                        <button x-on:click="temporaryAccessUntil = new Date(); extendActivation = undefined;" class="icon-button">Activate</button>
                     </div>
                 </div>
             </dialog>
 
-            <div class="column padding-huge">
-                <div>
-                    <h1>Type of setup</h1>
+            <div class="column gap-huge">
+                <div class="column gap-large">
+                    <div class="header-large">Type of setup</div>
 
-                    <div class="row">
+                    <div id="setup-type-selector">
                         <div class="card row padding-large selected">
                             <i class="bi bi-key-fill title"></i>
                             <div class="column gap-large">
                                 <div class="title">Manual</div>
-                                <div>Each call will be handled according to the rules specified in the settings, with fallback to manual approval using the app.</div>
+                                <div class="description">Each call will be handled according to the rules specified in the settings, with fallback to manual approval using the app.</div>
                             </div>
                         </div>
                         <div class="card row padding-large">
                             <i class="bi bi-grip-vertical title"></i>
                             <div class="column gap-large">
                                 <div class="title">Keypad</div>
-                                <div>The doorbell is transformed into a keypad, with a user customizable code for opening the door.
+                                <div class="description">The doorbell is transformed into a keypad, with a user customizable code for opening the door.
                                 <p>No calls are handled manually in this mode.</p>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div>
-                    <h1>Settings</h1>
+                <div class="column gap-large">
+                    <div class="header-large">Settings</div>
 
                     <div class="column gap-huge">
                         <div class="section">
@@ -514,7 +655,7 @@
                                 Temporary access
                             </div>
                             <div class="section-content">
-                                <div class="row">
+                                <div class="row gap-large">
                                     <div class="stretch foreign-center">
                                         <div x-show="temporaryAccessUntil">
                                             Temporary access is activated until <span class="emphasis" x-text="temporaryAccessUntil?.toLocaleTimeString()"></span>.
@@ -523,7 +664,10 @@
                                             Temporary access is currently not activated.
                                         </div>
                                     </div>
-                                    <button x-on:click="extendActivation = {}" x-text="temporaryAccessUntil ? 'Extend...' : 'Activate for...'"></button>
+                                    <button x-on:click="extendActivation = {}">
+                                        <i class="bi bi-clock"></i>
+                                        <div class="description" x-text="temporaryAccessUntil ? 'Extend...' : 'Activate for...'"></div>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -534,11 +678,14 @@
                             </div>
 
                             <div class="section-content">
-                                <div class="row">
+                                <div class="row gap-large">
                                     <div class="stretch foreign-center">
                                         Open the door automatically at these times of the day.
                                     </div>
-                                    <button x-on:click="addSchedule = { weekdays: [] }">Add...</button>
+                                    <button x-on:click="addSchedule = { weekdays: [] }">
+                                        <i class="bi bi-plus-lg"></i>
+                                        <div class="description">Add...</div>
+                                    </button>
                                 </div>
 
                                 <div class="grid" x-show="schedule.length > 0">
@@ -552,9 +699,10 @@
                                                     </template>
                                                 </div>
                                             </div>
-                                            <div class="center">
-                                                <button class="remove" x-on:click="schedule.splice(index, 1)">
+                                            <div class="grid-row-remove" tabindex="-1">
+                                                <button class="icon-button remove" x-on:click="schedule.splice(index, 1)">
                                                     <i class="bi bi-trash"></i>
+                                                    <div class="description">Remove</div>
                                                 </button>
                                             </div>
                                         </div>
@@ -569,9 +717,12 @@
                             </div>
 
                             <div class="section-content">
-                                <div class="row">
+                                <div class="row gap-large">
                                     <div class="stretch foreign-center">These codes can be used for temporary access.</div>
-                                    <button x-on:click="codes.push({})">Generate...</button>
+                                    <button x-on:click="codes.push({})">
+                                        <i class="bi bi-plus-lg"></i>
+                                        <div class="description">Generate...</div>
+                                    </button>
                                 </div>
 
                                 <div class="grid" x-show="codes.length > 0">
@@ -585,9 +736,10 @@
                                                     Allows access for <span x-text="row.ttl"></span> minutes
                                                 </div>
                                             </div>
-                                            <div class="center">
-                                                <button class="remove" x-on:click="codes.splice(index, 1)">
+                                            <div class="grid-row-remove" tabindex="-1">
+                                                <button class="icon-button remove" x-on:click="codes.splice(index, 1)">
                                                     <i class="bi bi-trash"></i>
+                                                    <div class="description">Remove</div>
                                                 </button>
                                             </div>
                                         </div>
