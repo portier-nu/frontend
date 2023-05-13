@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+
 <html>
     <head>
         <style>
@@ -567,61 +569,65 @@
             </div>
         </div>
         <div id="content" x-data="model">
-            <dialog x-effect="(addSchedule || $el.close()) && $el.showModal()">
-                <div class="header gap-huge title">
-                    <div class="stretch">Add schedule entry</div>
-                    <div class="close-button" x-on:click="addSchedule = undefined">
-                        <i class="bi bi-x"></i>
+            <template x-if="addSchedule">
+                <dialog x-init="$el.showModal()">
+                    <div class="header gap-huge title">
+                        <div class="stretch">Add schedule entry</div>
+                        <div class="close-button" x-on:click="addSchedule = undefined">
+                            <i class="bi bi-x"></i>
+                        </div>
                     </div>
-                </div>
-                <div class="center dialog-fill">
-                    <div class="content column gap-huge">
-                        <div class="section">
-                            <div class="section-header">Time interval</div>
-                            <div class="row gap-small foreign-center">
-                                <input type="time" class="stretch" x-model="addSchedule.start" required="true"></input> -
-                                <input type="time" class="stretch" x-model="addSchedule.end" required="true"></input>
+                    <div class="center dialog-fill">
+                        <div class="content column gap-huge">
+                            <div class="section">
+                                <div class="section-header">Time interval</div>
+                                <div class="row gap-small foreign-center">
+                                    <input type="time" class="stretch" x-model="addSchedule.start" required="true"></input> -
+                                    <input type="time" class="stretch" x-model="addSchedule.end" required="true"></input>
+                                </div>
+                            </div>
+                            <div class="section">
+                                <div class="section-header">Weekdays</div>
+                                <div class="weekdays">
+                                    <template x-for="(day, i) in allWeekdays()">
+                                        <div x-on:click="toggleWeekday(addSchedule?.weekdays, day)" :class="weekdayClasses(addSchedule?.weekdays, i, day)" x-text="day"></div>
+                                    </template>
+                                </div>
+                            </div>
+                            <div class="center">
+                                <button x-on:click="schedule.push(addSchedule); addSchedule = undefined;" class="icon-button">Add</button>
                             </div>
                         </div>
-                        <div class="section">
-                            <div class="section-header">Weekdays</div>
-                            <div class="weekdays">
-                                <template x-for="(day, i) in allWeekdays()">
-                                    <div x-on:click="toggleWeekday(addSchedule.weekdays, day)" :class="weekdayClasses(addSchedule.weekdays, i, day)" x-text="day"></div>
-                                </template>
-                            </div>
-                        </div>
-                        <div class="center">
-                            <button x-on:click="schedule.push(addSchedule); addSchedule = undefined;" class="icon-button">Add</button>
-                        </div>
                     </div>
-                </div>
-            </dialog>
+                </dialog>
+            </template>
 
-            <dialog x-effect="(extendActivation || $el.close()) && $el.showModal()">
-                <div class="header gap-huge title">
-                    <div class="stretch">Activate access</div>
-                    <div class="close-button" x-on:click="extendActivation = undefined">
-                        <i class="bi bi-x"></i>
+            <template x-if="extendActivation">
+                <dialog x-init="$el.showModal()">
+                    <div class="header gap-huge title">
+                        <div class="stretch">Activate access</div>
+                        <div class="close-button" x-on:click="extendActivation = undefined">
+                            <i class="bi bi-x"></i>
+                        </div>
                     </div>
-                </div>
-                <div class="center content column gap-huge dialog-fill">
-                    <div class="column gap-large" style="max-width: 400px;">
-                        <div>Select a time period for which to allow anyone to enter by calling the number.</div>
-                        <div>This exception will be removed automatically once the specified time has elapsed.</div>
+                    <div class="center content column gap-huge dialog-fill">
+                        <div class="column gap-large" style="max-width: 400px;">
+                            <div>Select a time period for which to allow anyone to enter by calling the number.</div>
+                            <div>This exception will be removed automatically once the specified time has elapsed.</div>
 
-                        <select>
-                            <option>30 minutes</option>
-                            <option>1 hour</option>
-                            <option>2 hours</option>
-                            <option>4 hours</option>
-                        </select>
+                            <select>
+                                <option>30 minutes</option>
+                                <option>1 hour</option>
+                                <option>2 hours</option>
+                                <option>4 hours</option>
+                            </select>
+                        </div>
+                        <div class="foreign-center">
+                            <button x-on:click="temporaryAccessUntil = new Date(); extendActivation = undefined;" class="icon-button">Activate</button>
+                        </div>
                     </div>
-                    <div class="foreign-center">
-                        <button x-on:click="temporaryAccessUntil = new Date(); extendActivation = undefined;" class="icon-button">Activate</button>
-                    </div>
-                </div>
-            </dialog>
+                </dialog>
+            </template>
 
             <div class="column gap-huge">
                 <div class="column gap-large">
